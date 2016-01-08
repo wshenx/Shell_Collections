@@ -39,7 +39,9 @@ function install {
 	wget -N --no-check-certificate https://raw.githubusercontent.com/Char1sma/Shell_Collections/master/ngx_google_deployment/index.html
 	sed -i "s/g.doufu.ru/$search_domain/" /var/www/google/index.html
 	sed -i "s/x.doufu.ru/$scholar_domain/" /var/www/google/index.html
-#6.start nginx
+#6.SSL Key
+	sslcert
+#7.start nginx
 	"$install_path/sbin/nginx"
 	if [ $? -eq 0 ]; then
 		echo "#Everything seems OK!"
@@ -164,19 +166,18 @@ EOF
 #3.Update
 	cd "$install_path/conf/"
 	mv -f nginx.conf nginx.conf.bak
-	wget -N --no-check-certificate https://raw.githubusercontent.com/Char1sma/Shell_Collections/master/ngx_google_deployment/nginx.conf
+#	wget -N --no-check-certificate https://raw.githubusercontent.com/Char1sma/Shell_Collections/master/ngx_google_deployment/nginx.conf
+	wget -N --no-check-certificate https://zhangzhe.32.pm/assets/nginx_onekey/nginx.conf
 	sed -i "s/g.doufu.ru/$search_domain/" nginx.conf
 	sed -i "s/x.doufu.ru/$scholar_domain/" nginx.conf
 	"$install_path/sbin/nginx"
-	if [ $? -eq 0 ]; then
+		if [ $? -eq 0 ]; then
 		echo "#Everything seems OK!"
-		echo "#Go ahead to see your new google!"
+		echo "#Go ahead to see your google!"
+		echo "#!!!Do not modify nginx.conf!!!"
 	else
-		echo "#Update errors!"
-		read -p "Press any key to start roll back or CTRL + C to exit..."
-		cd "$install_path/conf/"
-		rm nginx.conf
-		mv nginx.conf.bak nginx.conf
+		echo "#Installing errors!"
+		echo "#Reinstall OR Contact me!"
 	fi
 }
 # Kill :80
@@ -187,7 +188,15 @@ function kill80 {
 	else
 		echo "no :80 process!"
     fi
-	
+}
+function sslcert {
+	source "$HOME/nginx_onekey_config"
+	mkdir -p /var/www/ssls
+	cd /var/www/ssls
+	openssl req -nodes -newkey rsa:2048 -keyout $search_domain.key -out $search_domain.csr -subj "/C=GB/ST=London/L=London/O=Global Security/OU=IT Department/CN=$search_domain"
+	openssl x509 -req -days 3650 -in $search_domain.csr -signkey $search_domain.key -out $search_domain.crt
+	openssl req -nodes -newkey rsa:2048 -keyout $scholar_domain.key -out $scholar_domain.csr -subj "/C=GB/ST=London/L=London/O=Global Security/OU=IT Department/CN=$scholar_domain"
+	openssl x509 -req -days 3650 -in $scholar_domain.csr -signkey $scholar_domain.key -out $scholar_domain.crt
 }
 function uninstall {
 #1.Rootcheck
