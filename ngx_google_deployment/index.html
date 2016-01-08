@@ -27,7 +27,7 @@
         <li><a title="浏览器" href="http://www.google.cn/chrome/browser/desktop/index.html" target="_blank">Chrome</a></li>
        </ul>
        <ul class="nav navbar-nav navbar-right">
-		<li><a href="https://g.doufu.ru/?hl=zh_CN">中文</a></li>
+		<li><a href="//g.doufu.ru/webhp?hl=zh_CN">中文</a></li>
         <li><a target="_blank" href="http://www.32mb.cn/">32MB.CN</a></li>
        </ul>
      </div>
@@ -102,7 +102,7 @@ if (top.location != self.location) {
 function search1(){
 	var keyword1=document.getElementById("google");
 	if(keyword1.value==''||keyword1.value==null||keyword1.value== undefined){
-
+		goto("//g.doufu.ru/webhp?hl=en_US";
 	}
 	else {
 		goto("//g.doufu.ru/search?newwindow=1&safe=off&hl=en-US&q="+encodeURIComponent(keyword1.value))+"&gws_rd=ssl&cad=h";
