@@ -105,20 +105,20 @@ function search1(){
 
 	}
 	else {
-		goto("https://g.doufu.ru/search?newwindow=1&safe=off&hl=en-US&q="+encodeURIComponent(keyword1.value))+"&gws_rd=ssl&cad=h";
+		goto("//g.doufu.ru/search?newwindow=1&safe=off&hl=en-US&q="+encodeURIComponent(keyword1.value))+"&gws_rd=ssl&cad=h";
 	}
 }
 function search2(){
 	var keyword2=document.getElementById("scholar");
-	goto("https://x.doufu.ru/scholar?hl=zh-CN&q="+encodeURIComponent(keyword2.value)+"&btnG=&lr=");
+	goto("//x.doufu.ru/scholar?hl=zh-CN&q="+encodeURIComponent(keyword2.value)+"&btnG=&lr=");
 }
 function search3(){
 	var keyword3=document.getElementById("panbaidu");
-	goto("https://g.doufu.ru/search?newwindow=1&safe=off&q=site:pan.baidu.com+"+encodeURIComponent(keyword3.value)+"&btnG=&lr=");
+	goto("//g.doufu.ru/search?newwindow=1&safe=off&q=site:pan.baidu.com+"+encodeURIComponent(keyword3.value)+"&btnG=&lr=");
 }
 function search4(){
 	var keyword4=document.getElementById("zhihu");
-	goto("https://g.doufu.ru/search?newwindow=1&safe=off&q=site:zhihu.com+"+encodeURIComponent(keyword4.value)+"&btnG=&lr=");
+	goto("//g.doufu.ru/search?newwindow=1&safe=off&q=site:zhihu.com+"+encodeURIComponent(keyword4.value)+"&btnG=&lr=");
 }
 document.onkeydown=function(e) {
 	e=e||event;var key=e.keyCode||e.charCode;
@@ -143,6 +143,9 @@ function dowritedicta(num){var randid=Math.round(Math.random()*num);randid=randi
 document.getElementById("jsword").innerHTML=dowritedicta(dictumin.length)
 window.onload=function(){document.getElementById("google").focus()
 document.getElementById("TimeShow").innerHTML="&nbsp;(Consume&nbsp;"+(new Date().getTime()-t1)+"&nbsp;ms)";};
+window.onload=function() {
+	document.getElementById("google").focus();
+};
  </script>
  </body>
 
