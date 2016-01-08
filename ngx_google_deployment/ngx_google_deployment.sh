@@ -132,6 +132,8 @@ function rootness {
 function update {
 #1.Rootcheck
 	rootness
+#2.Kill:80
+	kill80
 #2.Configure
 	source "$HOME/nginx_onekey_config"
 	read -p "Do you need to change your domain for google and schoolar?(y/N):" change
@@ -176,6 +178,16 @@ EOF
 		rm nginx.conf
 		mv nginx.conf.bak nginx.conf
 	fi
+}
+# Kill :80
+function kill80 {
+	lsof -i :80|grep -v 'PID'|awk '{print $2}'|xargs kill -9
+	if [ $? -eq 0 ]; then
+        echo ":80 process has been killed!"
+	else
+		echo "no :80 process!"
+    fi
+	
 }
 function uninstall {
 #1.Rootcheck
