@@ -194,6 +194,18 @@ function uninstall {
 	rootness
 #2.Configure
 	source "$HOME/nginx_onekey_config"
+	read -p "Press any key to start uninstall or CTRL + C to exit..."
+	"$install_path/sbin/nginx -s stop"
+		# restore /etc/rc.local
+    if [[ -s /etc/rc.local_bak ]]; then
+        rm -f /etc/rc.local
+        mv /etc/rc.local_bak /etc/rc.local
+    fi
+	rm "$isntall_path/*" -rf
+	rm "$log_path" -rf
+	rm "$HOME/nginx_onekey_config"
+	rm -rf /var/www/google
+	echo "#Ngx_google_deployment uninstall success!"
 }
 case $1 in
 	h|H|help)
