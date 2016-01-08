@@ -1,11 +1,12 @@
 # ngx_google_deployment_mod_C
 Fork from [ngx_google_deployment](https://github.com/arnofeng/ngx_google_deployment "ngx_google_deployment").
 
-**Sometgins Important£ºnot avaliable on Centos.**
+**Sometgins Important: not avaliable on Centos.**
+
 **Things different from arnonofeng's:**
 
-1.You can specify nginx version.
-2.Self signed certificate.
+1. You can specify nginx version.
+2. Self signed certificate.
 
 **What**
 
