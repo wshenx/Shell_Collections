@@ -140,11 +140,19 @@ function update {
 	source "$HOME/nginx_onekey_config"
 	read -p "Do you need to change your domain for google and schoolar?(y/N):" change
 	if [ "$change" = "y" ] || [ "$change" = "Y" ]; then
-		read -p "Set your domain for google search: " search_domain
-		read -p "Set your domain for google scholar: " scholar_domain
+		read -p "Set your domain for google search: " domain1
+		read -p "Set your domain for google scholar: " domain2
+		if [ ! $domain ]||[ ! $domain2 ]||[ $domain1 = $domain2 ]; then
+				echo "Two domains should not be null OR the same! Error happens!"
+				exit 1
+			else
+				echo "your google search domain is $search_domain"
+				echo "your google scholar domain is $scholar_domain"
+				read -p "Press any key to continue ... " goodmood
+			fi
 		cat >> "$HOME/nginx_onekey_config" << EOF
-search_domain=$search_domain
-scholar_domain=$scholar_domain
+search_domain=$domain1
+scholar_domain=$domain2
 streamline=$streamline
 compile_poz=$compile_poz
 install_temp=$install_temp
@@ -162,6 +170,8 @@ install_path=$install_path
 conf_path=$conf_path
 log_path=$log_path
 EOF
+		rm "/var/www/ssls/$searchdomain.*" -rf
+		sslcrt;
 	fi
 #3.Update
 	cd "$install_path/conf/"
