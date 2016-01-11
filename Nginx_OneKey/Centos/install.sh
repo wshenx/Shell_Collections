@@ -1,24 +1,28 @@
 #!/bin/bash
-# Nginx Onekey Install Shell For Debian/Ubuntu
-# Tested with Debian 7 32/64bit
+# Nginx Onekey Install Shell For Centos
+# Tested with Centos 6 32/64bit
 # Script author <github-charisma@32mb.cn>
 # Blog : http://blog.iplayloli.com
 function install {
 #1.Load config
-	source source "$HOME/nginx_onekey_config"
-	test -d "$install_temp" || mkdir -p "$install_temp"
+	source ~/nginx_onekey_config
+	mkdir -p "$install_temp"
 	cd "$install_temp"
-#2.Prepare
-	apt-get update || apt-get update
-#2.1Handmade Clean and Streamlined Debian VPS System
+#2.Handmade Clean and Streamlined Debian VPS System
 	case "$streamline" in
 		yes)
-			apt-get -y purge bind9-* xinetd samba-* nscd-* portmap sendmail-* sasl2-bin;;
+			yum remove Deployment_Guide-en-US finger cups-libs cups ypbind -y
+			yum remove bluez-libs desktop-file-utils ppp rp-pppoe wireless-tools irda-utils -y
+			yum remove sendmail* samba* talk-server finger-server bind* xinetd -y
+			yum remove nfs-utils nfs-utils-lib rdate fetchmail eject ksh mkbootdisk mtools-y
+			yum remove syslinux tcsh startup-notification talk apmd rmt dump setserial portmap yp-tools -y
+			;;
 		*)
-			echo "skiped!";;
+			echo "skiped!"
+			;;
 	esac
 #3.Remove apache
-	apt-get -y purge apache2-*
+yum remove httpd* -y
 #4.Install nginx
 	upgrade
 #5.Set up nginx autostart
@@ -34,25 +38,25 @@ function install {
 	fi
 }
 function upgrade {
-#1.Load Config
+#1.Read Config
 	source ~/nginx_onekey_config
-	test -d "$install_temp" || mkdir -p "$install_temp"
-	cd "$install_temp"
-#2.Prepare and configure
-	apt-get update || apt-get update
-	apt-get install -y git gcc g++ make automake
+#2.Prepare
+	yum update -y|| yum update -y
+	yum install git gcc gcc-c++ make automake -y
 	if [ $? -eq 0 ]; then
-		echo "git gcc g++ make automake installed"
+		echo "git gcc gcc-c++ make automake installed"
 	else
-		apt-get install -y git gcc g++ make automake
+		yum install git gcc gcc-c++ make automake -y
 	fi
+	mkdir -p "$install_temp"
+	cd "$install_temp"
 #2.1.add user and group
 	/usr/sbin/groupadd -f $n_group
 	/usr/sbin/useradd -g $n_group $n_user
-#2.2 Download Nginx
+#2.2.Download and Unpack Nginx
 	wget http://nginx.org/download/nginx-$nginx_ver.tar.gz || wget http://nginx.org/download/nginx-$nginx_ver.tar.gz
 	tar -xzvf nginx-$nginx_ver.tar.gz || tar -xzvf nginx-$nginx_ver.tar.gz
-#2.3 Download subs_filter
+#2.3.Download subs_filter
 	git clone https://github.com/yaoweibin/ngx_http_substitutions_filter_module || git clone https://github.com/yaoweibin/ngx_http_substitutions_filter_module
 #2.4 Other preparation
 	case $complie_poz in
@@ -71,37 +75,27 @@ function upgrade {
 			;;
 		*)
 #			install pcre
-			apt-get install -y libpcre3 libpcre3-dev
+			yum install pcre pcre-devel -y
 			if [ $? -eq 0 ]; then
-			echo "libpcre3 libpcre3-dev installed"
+				echo "pcre pcre-devel installed"
 			else
-				apt-get install -y libpcre3 libpcre3-dev
+				yum install pcre pcre-devel -y 
 			fi
 #			install openssl zlib
-			apt-get install -y zlib1g zlib1g-dev openssl libssl-dev
+			yum install zlib zlib-devel openssl openssl-devel -y 
 			if [ $? -eq 0 ]; then
-				echo "zlib1g zlib1g-dev openssl libssl-dev installed"
+				echo "zlib zlib-devel openssl openssl-devel installed"
 			else
-				apt-get install -y zlib1g zlib1g-dev openssl libssl-dev
+				yum install zlib zlib-devel openssl openssl-devel -y
 			fi
 			cd "nginx-$nginx_ver"
-			./configure --prefix=$install_path --conf-path=$conf_path --user=$n_user --group=$n_group --error-log-path=$log_path/error.log --http-log-path=$log_path/access.log --pid-path=/var/run/nginx/nginx.pid --lock-path=/var/lock/nginx.lock --with-pcre-jit --with-ipv6 --with-http_ssl_module --with-http_stub_status_module --with-http_gzip_static_module --add-module=$install_temp/ngx_http_substitutions_filter_module
+			./configure --prefix=$install_path --conf-path=$conf_path --user=$n_user --group=$n_group --error-log-path=$log_path/error.log --http-log-path=$log_path/access.log --pid-path=/var/run/nginx/nginx.pid --lock-path=/var/lock/nginx.lock --with-pcre-jit --with-ipv6 --with-http_ssl_module --with-http_stub_status_module --with-http_gzip_static_module --with-http_realip_module --add-module=$install_temp/ngx_http_substitutions_filter_module
 			;;
 	esac
 #3.Installation
-	make
-	if [ ! $? -eq 0 ]; then
-		echo "Compile nginx failed.Exit now!"
-		rm -rf "$install_temp"
-		exit 2
-	fi
-	make install
-	if [ ! $? -eq 0 ]; then
-		echo "Nginx installed failed.Exit now!"
-		rm -rf "$install_temp"
-		exit 2
-	fi
-		echo "nginx sbin:$install_path/sbin/nginx"
+	make && make install
+	echo "nginx sbin:$install_path/sbin/nginx"
+	$install_path/sbin/nginx -V
 #4.Make dir and clean
 	mkdir -p "$log_path"
 	rm -rf "$install_temp"
