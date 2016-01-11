@@ -41,7 +41,11 @@ function upgrade {
 #1.Read Config
 	source ~/nginx_onekey_config
 #2.Prepare
-	yum update -y|| yum update -y
+	yum update -y
+	yum install git gcc gcc-c++ make automake -y
+	if [ ! $? -eq 0 ]; then
+		yum install git gcc gcc-c++ make automake -y
+	fi
 	yum install git gcc gcc-c++ make automake -y
 	if [ $? -eq 0 ]; then
 		echo "git gcc gcc-c++ make automake installed"
