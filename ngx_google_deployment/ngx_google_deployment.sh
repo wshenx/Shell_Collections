@@ -21,7 +21,7 @@ function install {
 	cd "$install_temp"
 	wget -N --no-check-certificate https://raw.githubusercontent.com/Char1sma/Shell_Collections/master/Nginx_OneKey/$system/install.sh
 	chmod +x install.sh
-	bash ./install.sh
+	bash ./install.sh install
 #4.Download nginx config file
 	cd "$install_path"
 	test -d "$install_path/conf" || mkdir "$install_path/conf"
