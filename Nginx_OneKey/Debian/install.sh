@@ -5,7 +5,7 @@
 # Blog : http://blog.iplayloli.com
 function install {
 #1.Load config
-	source source "$HOME/nginx_onekey_config"
+	source "$HOME/nginx_onekey_config"
 	test -d "$install_temp" || mkdir -p "$install_temp"
 	cd "$install_temp"
 #2.Prepare
