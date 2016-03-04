@@ -74,7 +74,6 @@ function adduser(){
 # Make sure only root can run our script
 check_sanity
 action=$1
-[  -z $1 ] && action=install
 case "$action" in
 uninstall)
     uninstallVPN
