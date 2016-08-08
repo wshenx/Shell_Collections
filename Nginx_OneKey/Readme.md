@@ -2,7 +2,7 @@
 Install nginx onekey.
 ## Usage:
 ```shell
-wget --no-check-certificate https://github.com/Char1sma/Shell_Collections/raw/master/Nginx_OneKey/onekey.sh && chmod +x onekey.sh && ./onekey.sh install | tee -a nginx_onekey.log
+wget --no-check-certificate https://github.com/Char1sma/Shell_Collections/raw/master/Nginx_OneKey/onekey.sh && bash onekey.sh install | tee -a nginx_onekey.log
 ```
 ## Depend on Projects
 - [Nginx](http://nginx.org/ "Nginx")
