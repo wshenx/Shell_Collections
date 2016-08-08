@@ -2,22 +2,34 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 NO_TEMP=/tmp/nginx_onekey
-NO_COMP=no
+NO_CUST=no
+NO_STREAM=no
 NO_PMIR=http://sulinux.stanford.edu/mirrors/exim/pcre
 NO_OMIR=http://mirrors.ibiblio.org/openssl/source
 NO_ZMIR=http://78.108.103.11/MIRROR/ftp/png/src/history/zlib
+NO_NVER=1.9.5
+NO_PVER=8.37
+NO_OVER=1.0.2h
+NO_ZVER=1.2.7
 NO_USER=www
 NO_GROUP=www
 NO_PATH=/etc/nginx
 NO_CONF=/etc/nginx/conf/nginx.conf
 NO_LOGP=/var/log/nginx
 clear
+# Root Check
+function rootness {
+if [[ $EUID -ne 0 ]]; then
+   echo "Error:This script must be run as root!" 1>&2
+   exit 1
+fi
+}
 rootness
 function slogan {
 echo -n "
 #========================================================================
 # 			Nginx OneKey Install Shell
-# Version :         0.2
+# Version :         0.21 beta1
 # Script author :   Charisma<github-charisma@32mb.cn>
 # Blog :            http://blog.iplayloli.com
 # System Required : Centos/Debian/Ubuntu
@@ -26,45 +38,21 @@ echo -n "
 "
 }
 function install {
-#	2.Choose system
-	if [ "$NO_SINGAL" = "reinstall" ];then
-		if [ -f "$HOME/nginx_onekey_config" ]; then
-			source "$HOME/nginx_onekey_config"
-		else
-			configure
-		fi
+	if [ -f "$HOME/nginx_onekey_config" ]; then
+		source "$HOME/nginx_onekey_config"
 	else
-		echo -n "Select which you want:
-	1.Install for Debian/Ubuntu
-	2.Install for Centos
-Your choice:"
-		read -r syst
-		case "$syst" in
-		1)
-			NO_SYST=Debian
-			;;
-		2)
-			NO_SYST=Centos
-			;;
-		*)
-			echo '# Error option, quit!'
-			exit 1
-			;;
-		esac
 		configure
 	fi
-#	4.Start Install
+#	Start Install
 	mkdir -p "$NO_TEMP"
 	install_nginx
 	exit
-#	5.Show Config Info
+#	Show Config Info
 	$NO_PATH/sbin/nginx -V
 	exit
 }
 function changeversion {
-#1.root access check
-	rootness
-#2.load config
+#	load config
 	if [ -f "$HOME/nginx_onekey_config" ];then
 		source $HOME/nginx_onekey_config
 		read -p "# Please input the nginx version you want to install[1.9.5]:" changever
@@ -73,36 +61,15 @@ function changeversion {
 		else
 			export NO_NVER=$changever
 		fi
-		rm -f "$HOME/nginx_onekey_config" && cat >> "$HOME/nginx_onekey_config" << EOF
-NO_SYST=$NO_SYST
-NO_TEMP=$NO_TEMP
-NO_CUST=$NO_CUST
-NO_NVER=$NO_NVER
-NO_PVER=$NO_PVER
-NO_STREAM=no
-NO_OVER=$NO_OVER
-NO_ZVER=$NO_ZVER
-NO_USER=$NO_USER
-NO_GROUP=$NO_GROUP
-NO_PATH=$NO_PATH
-NO_CONF=$NO_CONF
-NO_LOGP=$NO_LOGP	
-EOF
-	export NO_SINGAL=reinstall
-	install
+		rm -f "$HOME/nginx_onekey_config" && write_conf
+		install_nginx
 	else
 		echo "It seems that you don't have install Nginx_Onekey"
 		exit 2;
 	fi
-#3.upgrade Nginx to any version
-	mkdir -p "$NO_TEMP"
-	cd "$NO_TEMP"
-	wget --no-check-certificate https://raw.githubusercontent.com/Char1sma/Shell_Collections/master/Nginx_OneKey/$system/install.sh
-	bash install.sh upgrade
-	exit
 }
 function centos_nginx {
-	yum update || yum update
+	yum update -y || yum update -y
 	yum install gcc gcc-c++ make automake -y
 	if [ $? -eq 0 ]; then
 		echo "gcc gcc-c++ make automake installed"
@@ -232,6 +199,23 @@ function configure {
 	fi
 }
 function question {
+	echo -n "Select which you want:
+	1.Install for Debian/Ubuntu
+	2.Install for Centos
+Your choice:"
+	read -r syst
+	case "$syst" in
+	1)
+		NO_SYST=Debian
+		;;
+	2)
+		NO_SYST=Centos
+		;;
+	*)
+		echo '# Error option, quit!'
+		exit 1
+		;;
+	esac
 	read -p "# Do you want to custom installation info[y/N]:" custom
 		case "$custom" in
 		Y|y)
@@ -271,15 +255,13 @@ function question {
 			fi
 			;;
 		*)
-			export NO_CUST=no
-			export NO_STREAM=no
-			export NO_NVER=1.9.5
-			export NO_PVER=8.37
-			export NO_OVER=1.0.2h
-			export NO_ZVER=1.2.7
+			echo "# Skiped!"
 			;;
 		esac
-		cat >> "$HOME/nginx_onekey_config" << EOF
+		write_conf
+}
+function write_conf {
+	cat >> "$HOME/nginx_onekey_config" << EOF
 NO_SYST=$NO_SYST
 NO_TEMP=$NO_TEMP
 NO_CUST=$NO_CUST
@@ -318,34 +300,28 @@ function clean {
 	rm "$HOME/nginx_onekey_config" -f
 	echo "# All has been done!"
 }
-function rootness {
-if [[ $EUID -ne 0 ]]; then
-   echo "Error:This script must be run as root!" 1>&2
-   exit 1
-fi
-}
 case "$1" in
-	install)
-		slogan
-		install;;
-	change)
-		slogan
-		changeversion;;
-	uninstall)
-		slogan
-		uninstall;;
-	configure)
-		slogan
-		configure;;
-	clean)
-		clean;;
-	*)
-		echo "unrecognized option:"
-		echo "-------------------------------------"
-		echo "Usage: $0 [option]"
-		echo "$0 install    install Nginx Onekey"
-		echo "$0 uninstall  uninstall Nginx Onekey"
-		echo "$0 change     change Nginx version"
-		exit 1
-		;;
+install)
+	slogan
+	install;;
+change)
+	slogan
+	changeversion;;
+uninstall)
+	slogan
+	uninstall;;
+configure)
+	slogan
+	configure;;
+clean)
+	clean;;
+*)
+	echo "unrecognized option:"
+	echo "-------------------------------------"
+	echo "Usage: $0 [option]"
+	echo "$0 install    install Nginx Onekey"
+	echo "$0 uninstall  uninstall Nginx Onekey"
+	echo "$0 change     change Nginx version"
+	exit 1
+	;;
 esac
