@@ -12,6 +12,7 @@ NO_PATH=/etc/nginx
 NO_CONF=/etc/nginx/conf/nginx.conf
 NO_LOGP=/var/log/nginx
 clear
+rootness
 function slogan {
 echo -n "
 #========================================================================
@@ -25,8 +26,6 @@ echo -n "
 "
 }
 function install {
-#	1.root access check
-	rootness
 #	2.Choose system
 	if [ "$NO_SINGAL" = "reinstall" ];then
 		if [ -f "$HOME/nginx_onekey_config" ]; then
