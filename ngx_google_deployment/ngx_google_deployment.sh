@@ -9,15 +9,16 @@ function rootness {
 }
 rootness
 function slogan {
-echo -n "#=============================================================================
+clear
+echo -n "#========================================================================
 #                   ngx_google_deployment_mod_C Install Shell
-# Version :         0.1 alpha 1
+# Version :         0.1 beta2
 # Script author :   Charisma<github-charisma@32mb.cn>
 # Blog :            http://blog.iplayloli.com
-# System Required : Debian
-# Project url :     https://github.com/Shell_Collections/ngx_google_deployment
+# System Required : Centos/Debian/Ubuntu
+# Project url :https://github.com/Shell_Collections/ngx_google_deployment
 # Thanks To :       arnofeng<http://github.com/arnofeng>
-#============================================================================="
+#========================================================================"
 }
 function install {
 	kill80
@@ -139,53 +140,50 @@ function update {
 		read -p "Set your domain for google search: " domain1
 		read -p "Set your domain for google scholar: " domain2
 		if [ ! $domain ]||[ ! $domain2 ]||[ $domain1 = $domain2 ]; then
-				echo "Two domains should not be null OR the same! Error happens!"
-				exit 1
-			else
-				echo "your google search domain is $search_domain"
-				echo "your google scholar domain is $scholar_domain"
-				read -p "Press any key to continue ... " goodmood
-			fi
+			echo "Two domains should not be null OR the same! Error happens!"
+			exit 1
+		else
+			echo "your google search domain is $search_domain"
+			echo "your google scholar domain is $scholar_domain"
+			read -p "Press any key to continue ... " goodmood
+		fi
+		rm "/var/www/ssls/$NO_SEARCH.*" -rf
+		rm "/var/www/ssls/$NO_SCHOLAR.*" -rf
 		cat >> "$HOME/nginx_onekey_config" << EOF
-search_domain=$domain1
-scholar_domain=$domain2
-streamline=$streamline
-compile_poz=$compile_poz
-install_temp=$install_temp
-nginx_ver=$nginx_ver
-pcre_ver=$pcre_ver
-pcre_mirror=$pcre_mirror
-ossl_ver=$ossl_ver
-ossl_mirror=$ossl_mirror
-zlib_ver=$zlib_ver
-zlib_mirror=$zlib_mirror
-mirror=$mirror
-n_user=$n_user
-n_group=$n_group
-install_path=$install_path
-conf_path=$conf_path
-log_path=$log_path
+$NO_SEARCH=$domain1
+$NO_SCHOLAR=$domain2
+NO_SYST=$NO_SYST
+NO_TEMP=$NO_TEMP
+NO_CUST=no
+NO_STREAM=no
+NO_USER=$NO_USER
+NO_GROUP=$NO_USER
+NO_PATH=$NO_PATH
+NO_CONF=$NO_CONF
+NO_LOGP=$NO_LOGP
 EOF
-		rm "/var/www/ssls/$searchdomain.*" -rf
+		install
+		cd "$NO_PATH/conf/"
+		mv -f nginx.conf nginx.conf.bak
+		wget -N --no-check-certificate https://raw.githubusercontent.com/Char1sma/Shell_Collections/master/ngx_google_deployment/nginx.conf
+		sed -i "s/g.doufu.ru/$NO_SEARCH/" nginx.conf
+		sed -i "s/x.doufu.ru/$NO_SCHOLAR/" nginx.conf
 		sslcrt;
-	fi
-#3.Update
-	cd "$install_path/conf/"
-	mv -f nginx.conf nginx.conf.bak
-	wget -N --no-check-certificate https://raw.githubusercontent.com/Char1sma/Shell_Collections/master/ngx_google_deployment/nginx.conf
-	sed -i "s/g.doufu.ru/$search_domain/" nginx.conf
-	sed -i "s/x.doufu.ru/$scholar_domain/" nginx.conf
-	"$install_path/sbin/nginx"
-		if [ $? -eq 0 ]; then
-		echo "#Everything seems OK!"
-		echo "#Go ahead to see your google!"
-		echo "#!!!Do not modify nginx.conf!!!"
 	else
-		echo "#Installing errors!"
-		echo "#Reinstall OR Contact me!"
+		$NO_PATH/sbin/nginx
+		if [ $? -eq 0 ]; then
+			echo "# Everything seems OK!"
+			echo "# Go ahead to see your google!"
+			echo "# !!!Do not modify nginx.conf!!!"
+		else
+			echo "#Installing errors!"
+			echo "#Reinstall OR Contact me!"
+		fi
 	fi
 }
 function kill80 {
+	yum update || apt-get update
+	yum install lsof -y|| apt-get install lsof -y
 	lsof -i :80|grep -v 'PID'|awk '{print $2}'|xargs kill -9
 	if [ $? -eq 0 ]; then
         echo ":80 process has been killed!"
@@ -202,8 +200,18 @@ function sslcert {
 	openssl req -nodes -newkey rsa:2048 -keyout $NO_SCHOLAR.key -out $NO_SCHOLAR.csr -subj "/C=GB/ST=London/L=London/O=Global Security/OU=IT Department/CN=$NO_SCHOLAR"
 	openssl x509 -req -days 3650 -in $NO_SCHOLAR.csr -signkey $NO_SCHOLAR.key -out $NO_SCHOLAR.crt
 }
+function clean {
+	source "$HOME/nginx_onekey_config"
+	rm -rf "$NO_TEMP"
+	rm -rf "$NO_PATH"
+	rm -rf "$NO_LOGP"
+	rm -f "$HOME/nginx_onekey_config"
+	rm -rf /var/www/google
+	rm "/var/www/ssls/$NO_SEARCH.*" -rf
+	rm "/var/www/ssls/$NO_SCHOLAR.*" -rf
+	echo "# All has been done!"
+}
 function uninstall {
-#2.Configure
 	source "$HOME/nginx_onekey_config"
 	read -p "Press any key to start uninstall or CTRL + C to exit..."
 	"$NO_PATH/sbin/nginx -s stop"
@@ -212,12 +220,10 @@ function uninstall {
         rm -f /etc/rc.local
         mv /etc/rc.local_bak /etc/rc.local
     fi
-	rm "$NO_PATH/*" -rf
-	rm "$NO_LOGP" -rf
-	rm "$HOME/nginx_onekey_config"
-	rm -rf /var/www/google
+	clean
 	echo "# Ngx_google_deployment uninstall success!"
 }
+slogan
 case $1 in
 	h|H|help)
 		echo "Usage: $0 [OPTION]"
