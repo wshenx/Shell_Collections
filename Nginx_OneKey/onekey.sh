@@ -37,6 +37,18 @@ echo -n "
 #========================================================================
 "
 }
+function startup {
+	cp -r -f /etc/rc.local /etc/rc.local_bak
+	AUTO='$NO_PATH/sbin/nginx'
+	cat /etc/rc.local|grep 'exit 0'
+	if [ $? -eq 0 ]; then
+		sed -i 's/\"exit 0\"/\#/g' /etc/rc.local
+		sed -i 's/\#exit 0/\#/g' /etc/rc.local
+		sed -i "s#exit 0#$AUTO\nexit 0#" /etc/rc.local
+	else
+		echo "$AUTO">>/etc/rc.local
+	fi
+}
 function install {
 	if [ -f "$HOME/nginx_onekey_config" ]; then
 		source "$HOME/nginx_onekey_config"
@@ -107,7 +119,7 @@ function debian_nginx {
 		yes)
 			apt-get -y purge bind9-* xinetd samba-* nscd-* portmap sendmail-* sasl2-bin;;
 		*)
-			echo "# Skiped!";;
+			echo "# Streamlition Skiped!";;
 	esac
 	# Remove apache2
 	apt-get -y purge apache2-*
@@ -175,6 +187,7 @@ function install_nginx {
 		rm -rf "$HOME/nginx_onekey_config"
 		exit 2
 	fi
+	startup
 	echo "# nginx sbin path:$NO_PATH/sbin/nginx"
 #4.Make dir and clean
 	mkdir -p "$NO_LOGP"
@@ -284,10 +297,10 @@ read -p "Are you sure uninstall Nginx_Onekey? (y/N) " answer
 	fi
 	if [ "$answer" = "y" ]; then
 		source $HOME/nginx_onekey_config
-		#if [[ -s /etc/rc.local_bak ]]; then
-		#	rm -f /etc/rc.local
-		#	mv /etc/rc.local_bak /etc/rc.local
-		#fi
+		if [[ -s /etc/rc.local_bak ]]; then
+			rm -f /etc/rc.local
+			mv /etc/rc.local_bak /etc/rc.local
+		fi
 		clean
 		echo "Nginx_Onekey uninstall success!"
 	else
@@ -297,6 +310,8 @@ read -p "Are you sure uninstall Nginx_Onekey? (y/N) " answer
 }
 function clean {
 	rm "$NO_TEMP" -rf
+	rm "$NO_PATH" -rf
+	rm "$NO_LOGP" -rf
 	rm "$HOME/nginx_onekey_config" -f
 	echo "# All has been done!"
 }
